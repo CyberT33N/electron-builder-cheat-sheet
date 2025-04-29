@@ -34,29 +34,6 @@ NSIS scripts allow defining specific "macros" that run at different stages. Comm
 *   `!macro customUninstall`: Executes custom commands *before* the uninstaller removes files.
 *   `!macro preInit`: Executes *before* the installer UI shows up or installation begins (Use with caution, as it can interfere with standard installer behavior).
 
-**Example: Pinning Application to Taskbar (not testes)**
-
-You can use the `customInstall` macro to pin the application to the taskbar after installation. There are two main approaches:
-
-1.  **Pinning the Start Menu Shortcut (Preferred):** This usually avoids duplicate taskbar icons when the app is running.
-    ```nsh
-    !macro customInstall
-        ; Requires StdUtils plugin (usually included by electron-builder)
-        ; Pins the .lnk file created in the Start Menu Programs folder
-        ${StdUtils.InvokeShellVerb} $0 "$SMPROGRAMS\${PRODUCT_NAME}" "${PRODUCT_FILENAME}.lnk" ${StdUtils.Const.ShellVerb.PinToTaskbar}
-    !macroend
-    ```
-2.  **Pinning the Executable Directly:** This can be a fallback if shortcut creation is problematic (e.g., due to custom install locations), but may result in duplicate taskbar icons.
-    ```nsh
-    !macro customInstall
-        ; Requires StdUtils plugin
-        ; Pins the actual .exe file from the installation directory
-        ${StdUtils.InvokeShellVerb} $0 "$INSTDIR" "${APP_EXECUTABLE_FILENAME}" ${StdUtils.Const.ShellVerb.PinToTaskbar}
-    !macroend
-    ```
-
----
-
 ## Debugging NSIS Scripts (`installer.nsh`)
 
 Standard JavaScript debugging tools (`console.log`, debuggers) **do not work** for NSIS scripts, as they run in the installer environment *before* your Electron app starts.
