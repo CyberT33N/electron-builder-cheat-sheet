@@ -1,1 +1,120 @@
 # electron-builder-cheat-sheet
+
+- https://www.npmjs.com/package/electron-builder
+- https://www.electron.build/
+
+
+
+
+# Customizing the NSIS Installer
+
+## Custom NSIS Scripts (`installer.nsh`)
+
+When using `electron-builder` with the NSIS target (`"target": ["nsis"]` in `package.json`) for creating Windows installers (`.exe`), you can customize the installation process beyond the default behavior by providing a custom NSIS include script.
+
+**Integration:**
+
+1.  **Create the script file:** Typically named `installer.nsh`. While the standard location is a `build/` directory at the project root, in this specific project, it's located at `src/renderer/assets/build/installer.nsh`.
+2.  **Link in `package.json`:** Tell `electron-builder` where to find this script using the `include` option within the `build.nsis` configuration:
+    ```json
+    "build": {
+      // ... other options
+      "nsis": {
+        // ... other nsis options
+        "include": "src/renderer/assets/build/installer.nsh" 
+      }
+    }
+    ```
+
+**Common Use Case: Running Code During Installation/Uninstallation**
+
+NSIS scripts allow defining specific "macros" that run at different stages. Common ones used with `electron-builder` are:
+
+*   `!macro customInstall`: Executes custom commands *after* the main application files have been installed.
+*   `!macro customUninstall`: Executes custom commands *before* the uninstaller removes files.
+*   `!macro preInit`: Executes *before* the installer UI shows up or installation begins (Use with caution, as it can interfere with standard installer behavior).
+
+**Example: Pinning Application to Taskbar (not testes)**
+
+You can use the `customInstall` macro to pin the application to the taskbar after installation. There are two main approaches:
+
+1.  **Pinning the Start Menu Shortcut (Preferred):** This usually avoids duplicate taskbar icons when the app is running.
+    ```nsh
+    !macro customInstall
+        ; Requires StdUtils plugin (usually included by electron-builder)
+        ; Pins the .lnk file created in the Start Menu Programs folder
+        ${StdUtils.InvokeShellVerb} $0 "$SMPROGRAMS\${PRODUCT_NAME}" "${PRODUCT_FILENAME}.lnk" ${StdUtils.Const.ShellVerb.PinToTaskbar}
+    !macroend
+    ```
+2.  **Pinning the Executable Directly:** This can be a fallback if shortcut creation is problematic (e.g., due to custom install locations), but may result in duplicate taskbar icons.
+    ```nsh
+    !macro customInstall
+        ; Requires StdUtils plugin
+        ; Pins the actual .exe file from the installation directory
+        ${StdUtils.InvokeShellVerb} $0 "$INSTDIR" "${APP_EXECUTABLE_FILENAME}" ${StdUtils.Const.ShellVerb.PinToTaskbar}
+    !macroend
+    ```
+
+---
+
+## Debugging NSIS Scripts (`installer.nsh`)
+
+Standard JavaScript debugging tools (`console.log`, debuggers) **do not work** for NSIS scripts, as they run in the installer environment *before* your Electron app starts.
+
+**Using `MessageBox`:**
+
+The primary way to debug NSIS scripts and inspect variable values is by using the `MessageBox` command. It displays a pop-up window during the installation process.
+
+**Syntax:**
+
+```nsh
+MessageBox <Type> "<Your Text Message>"
+; Example showing a variable's value:
+MessageBox MB_OK "The installation directory is: $INSTDIR"
+```
+
+*   `MB_OK` is a common type, showing a simple box with an "OK" button. Other types exist (e.g., `MB_YESNO`, `MB_ICONINFORMATION`).
+*   Use NSIS variable syntax (`$VARIABLE` or `${VARIABLE}`) within the quoted string to display their runtime values.
+*   Remember to use `\\` if you need to display a literal backslash within the message string itself.
+
+**Example Debugging Snippet:**
+
+```nsh
+!macro customInstall
+    # Check variable values before using them
+    MessageBox MB_OK "INSTDIR = $INSTDIR"
+    MessageBox MB_OK "APP_EXECUTABLE_FILENAME = ${APP_EXECUTABLE_FILENAME}"
+    MessageBox MB_OK "Attempting to pin: $INSTDIR\\${APP_EXECUTABLE_FILENAME}" # Note \\ for display
+
+    # The actual command
+    ${StdUtils.InvokeShellVerb} $0 "$INSTDIR" "${APP_EXECUTABLE_FILENAME}" ${StdUtils.Const.ShellVerb.PinToTaskbar}
+
+    MessageBox MB_OK "Pin command executed." # Confirm execution reached this point
+!macroend
+```
+
+---
+
+## Common NSIS Variables/Constants (Relevant for `electron-builder`)
+
+These variables are typically available within your `installer.nsh` script when run via `electron-builder`.
+
+| Variable/Constant             | Description                                                                                                | Example Value (Typical)                |
+| :---------------------------- | :--------------------------------------------------------------------------------------------------------- | :------------------------------------- |
+| `$INSTDIR`                    | The installation directory chosen by the user or set by the installer.                                     | `C:\Users\User\AppData\Local\Programs\MyApp` or `C:\Program Files\MyApp` |
+| `${APP_EXECUTABLE_FILENAME}`  | The filename of the main application executable.                                                           | `MyApp.exe`                            |
+| `${PRODUCT_FILENAME}`         | The product name, often sanitized for use in filenames (might be same as `APP_EXECUTABLE_FILENAME` without `.exe`). | `MyApp`                                |
+| `${PRODUCT_NAME}`             | The application name as defined in `package.json` (`productName` or `name`).                               | `My Application`                       |
+| `$PROGRAMFILES` / `$PROGRAMFILES64` | The path to the Program Files directory (use `$PROGRAMFILES64` explicitly for 64-bit).                     | `C:\Program Files`                     |
+| `$APPDATA`                    | The current user's Application Data directory (`%APPDATA%`).                                               | `C:\Users\User\AppData\Roaming`        |
+| `$LOCALAPPDATA`               | The current user's local, non-roaming Application Data directory (`%LOCALAPPDATA%`).                         | `C:\Users\User\AppData\Local`          |
+| `$DESKTOP`                    | The path to the current user's Desktop directory.                                                          | `C:\Users\User\Desktop`                |
+| `$SMPROGRAMS`                 | The path to the current user's Start Menu Programs directory.                                              | `C:\Users\User\AppData\Roaming\Microsoft\Windows\Start Menu\Programs` |
+| `$STARTMENU`                  | The path to the current user's Start Menu directory.                                                       | `C:\Users\User\AppData\Roaming\Microsoft\Windows\Start Menu` |
+| `$SYSDIR`                     | The Windows System directory (System32).                                                                   | `C:\Windows\System32`                  |
+| `$WINDIR`                     | The Windows directory.                                                                                     | `C:\Windows`                           |
+| `${INSTALL_REGISTRY_KEY}`     | The registry key used by the installer (defined by `electron-builder`, e.g., `Software\Microsoft\Windows\CurrentVersion\Uninstall\{appId}`). | `Software\...\...\{guid}`              |
+
+*Note: Some paths might differ based on Windows version, language, and user configuration.*
+
+
