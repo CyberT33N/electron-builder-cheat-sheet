@@ -8,6 +8,8 @@
 
 # Customizing the NSIS Installer
 
+<details><summary>Click to expand..</summary>
+
 ## Custom NSIS Scripts (`installer.nsh`)
 
 When using `electron-builder` with the NSIS target (`"target": ["nsis"]` in `package.json`) for creating Windows installers (`.exe`), you can customize the installation process beyond the default behavior by providing a custom NSIS include script.
@@ -93,5 +95,32 @@ These variables are typically available within your `installer.nsh` script when 
 | `${INSTALL_REGISTRY_KEY}`     | The registry key used by the installer (defined by `electron-builder`, e.g., `Software\Microsoft\Windows\CurrentVersion\Uninstall\{appId}`). | `Software\...\...\{guid}`              |
 
 *Note: Some paths might differ based on Windows version, language, and user configuration.*
+
+</details>
+
+
+
+
+
+
+
+
+
+
+<br><br>
+________
+________
+<br><br>
+
+# FAQ
+
+<details><summary>Click to expand..</summary>
+
+# Installation
+
+## Can not close application error while installe
+- Manchmal erhält man diesen **Error** mitten in der **Installation**. Da steht dann, dass die **Applikation** nicht geschlossen werden kann, und man kann auf **Wiederholen** klicken. Wenn man dann auf **Wiederholen** klickt, sollte das das **Problem** lösen, und danach ist bei erneuter Installation das Problem weg. Schwer zu sagen, was die **Ursache** dahinter ist. Ein **Neustart** hilft tatsächlich auch nicht, aber auf **Wiederholen** klicken hilft.
+    
+</details>
 
 
