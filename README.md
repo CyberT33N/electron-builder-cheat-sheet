@@ -161,7 +161,13 @@ ________
 # Installation
 
 ## Can not close application error while installe
-- Manchmal erhält man diesen **Error** mitten in der **Installation**. Da steht dann, dass die **Applikation** nicht geschlossen werden kann, und man kann auf **Wiederholen** klicken. Wenn man dann auf **Wiederholen** klickt, sollte das das **Problem** lösen, und danach ist bei erneuter Installation das Problem weg. Schwer zu sagen, was die **Ursache** dahinter ist. Ein **Neustart** hilft tatsächlich auch nicht, aber auf **Wiederholen** klicken hilft.
+- Manchmal erhält man diesen **Error** mitten in der **Installation**. Da steht dann, dass die **Applikation** nicht geschlossen werden kann, und man kann auf **Wiederholen** klicken.
+
+Option 1:
+- Uninstall
+
+Option 2:
+- Wenn man dann auf **Wiederholen** klickt, sollte das das **Problem** lösen, und danach ist bei erneuter Installation das Problem weg. Schwer zu sagen, was die **Ursache** dahinter ist. Ein **Neustart** hilft tatsächlich auch nicht, aber auf **Wiederholen** klicken hilft.
     
 </details>
 
