@@ -6,6 +6,48 @@
 
 
 
+
+# Uninstall
+
+<details><summary>Click to expand..</summary>
+
+## Silent
+
+### Powershell
+```
+Start-Process "Uninstall test.exe" -ArgumentList "/S" -Wait
+```
+
+
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br><br>
+________
+________
+<br><br>
+
+
+
+
 # Customizing the NSIS Installer
 
 <details><summary>Click to expand..</summary>
